@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Who Is The Greatest of All Time</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<!-- Le styles -->
+<link href="assets/css/bootstrap.css" rel="stylesheet">
+<style type="text/css">
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+</style>
+<link href="../assets/css/bootstrap-responsive.css" rel="stylesheet">
+
+<!-- HTML5 shim, for IE6-8 support of HTML5 elements --> 
+<!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]--> 
+
+<!-- Fav and touch icons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+<link rel="shortcut icon" href="../assets/ico/favicon.png">
+</head>
+
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+      <a class="brand" href="index.html">Offensive Statists</a>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li class="active"><a href="scene-1.html">Scene 1</a></li>
+          <li><a class="btn disabled" href="#">Scene 2</a></li>
+          <li><a class="btn disabled" href="#">Scene 3</a></li>
+        </ul>
+      </div>
+      <!--/.nav-collapse --> 
+    </div>
+  </div>
+</div>
+
+<!-- Load d3.js --> 
+<script src="https://d3js.org/d3.v4.js"></script>
+<div class="container">
+  <div class="hero-unit">
+	<h4>Let’s compare career Stats in Points, Rebounds, Assist, Steals, and Blocks for the these all-time NBA greats and see who is really the greatest!</h4>
+    <h5>Select each Button to see each players career stats in each category.</h5>
+    <!-- Add a few buttons -->
+    <button class="btn" onclick="update('var1')">Points</button>
+    <button class="btn" onclick="update('var2')">Rebounds</button>
+    <button class="btn" onclick="update('var3')">Assist</button>
+    <div id="my_dataviz"></div>
+    <blockquote>
+      <p><em>When you compare these players all time career stats in points, assist, and rebounds.
+        Lebron James is in the top 2 in all 3 categories, 1st in Points, and 2nd in Rebounding &amp; assist. <strong>Michael Jordan, and Kobe Bryant fall behind in him in all 3 categories.</strong></em></p>
+    </blockquote>
+    <p></p>
+    <p><a href="scene-2.html" class="btn btn-primary btn-large">Next &raquo;</a></p>
+    <p><strong>Lets Check Out 2 Steals and Blocks</strong></p>
+  </div>
+</div>
+<script>
+// set the dimensions and margins of the graph
+var margin = {top: 30, right: 30, bottom: 70, left: 60},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+// Initialize the X axis
+var x = d3.scaleBand()
+  .range([ 0, width ])
+  .padding(0.2);
+var xAxis = svg.append("g")
+  .attr("transform", "translate(0," + height + ")")
+
+// Initialize the Y axis
+var y = d3.scaleLinear()
+  .range([ height, 0]);
+var yAxis = svg.append("g")
+  .attr("class", "myYaxis")
+
+// A function that create / update the plot for a given variable:
+function update(selectedVar) {
+
+  // Parse the Data
+  d3.csv("offensive_data.csv", function(data) {
+
+	// Removing previous text vaules   
+	d3.selectAll(".myTexts").remove();
+
+    // X axis
+    x.domain(data.map(function(d) { return d.group; }))
+    xAxis.transition().duration(1000).call(d3.axisBottom(x))
+
+    // Add Y axis
+    y.domain([0, d3.max(data, function(d) { return +d[selectedVar] }) ]);
+    yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+	  //adding annotations - value for each category on top of each bar
+var texts = svg.selectAll(".myTexts")
+    .data(data)
+    .enter()
+    .append("text")
+
+texts
+	.attr("x", function(d) { return x(d.group); })
+    .attr("y", function(d) { return y(d[selectedVar]); })
+	.attr("class","myTexts")
+    .text(function(d){ return +d[selectedVar]});
+ 
+    // variable u: map data to existing bars
+    var u = svg.selectAll("rect")
+      .data(data)
+
+    // update bars
+    u
+      .enter()
+      .append("rect")
+      .merge(u)
+      .transition()
+      .duration(1000)
+        .attr("x", function(d) { return x(d.group); })
+        .attr("y", function(d) { return y(d[selectedVar]); })
+        .attr("width", x.bandwidth())
+        .attr("height", function(d) { return height - y(d[selectedVar]); })
+	  	.attr("fill", function(d){ return d.group == "James" ? "#FDB927" : "#552583"});
+
+	  
+  })
+
+}
+
+// Initialize plot
+update('var1')
+
+</script>
+</body>
+</html>
